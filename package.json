@@ -1,0 +1,33 @@
+{
+  "name": "jglr",
+  "version": "0.1.0",
+  "description": "simple asynchronous batch-file processing framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://koma75@github.com/koma75/jglr.git"
+  },
+  "keywords": [
+    "async",
+    "batch"
+  ],
+  "author": "Yasuhiro Okuno",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/koma75/jglr/issues"
+  },
+  "homepage": "https://github.com/koma75/jglr",
+  "devDependencies": {
+    "coffee-script": "^1.7.1",
+    "coffeelint": "^1.1.0",
+    "grunt-coffeelint": "0.0.8",
+    "uglifyjs": "^2.3.6",
+    "grunt-contrib-coffee": "^0.10.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt": "^0.4.4",
+    "grunt-contrib-uglify": "^0.4.0"
+  }
+}
