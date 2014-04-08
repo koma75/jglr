@@ -59,6 +59,45 @@ jglr.dispatchNext(myNext);
 
 ~~~
 
+#### new Jglr(opts)
+
+* description
+    * create jglr instance
+* params
+    * opts [Object]: hash object to initialize with.
+        * filename [String] (null): path to batch file.
+        * logger [Object] (null): log4js logger object to use. if ommitted, 
+          console will be used for error reports.
+        * mode [String] ("seq"): initial mode of either "seq" or "par"
+
+#### jglr.load(filename)
+
+* description
+    * load the batch file into memory and create a batch dispatch queue.
+* params
+    * filename [String]: path to batch file to load
+        * if ommited, it will try to use whatever path that was
+          previousely loaded, or path passed through the constructor
+
+#### jglr.registerCmd(cmdname, callback)
+
+* description
+    * register callbacks to commands
+* params
+    * cmdname [String]: command name to hook to
+    * callback [Function]: function(params, done)
+        * params is an array of parameters written in tha batch
+        * done() is the callback to call when the command is done.
+
+#### jglr.dispatchNext(next)
+
+* description
+    * dispatch the next set of commands in the batch file
+* params
+    * next [Function]: function(hasNext)
+        * hasNext [Boolean]: true if there is still commands left to execute
+          false if it has reached end of batch file.
+
 ### batch file format
 
 Batch file is a csv where the first collum is the command name to execute

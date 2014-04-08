@@ -106,7 +106,7 @@ class Jglr
         nextline = @batch.splice(0,1)
         jglogger.debug "pushing: #{JSON.stringify(nextline[0])}"
         retArr.push(nextline[0])
-      if @mode == 'seq'
+      if @mode != 'seq'
         break
     return retArr
 
