@@ -1,6 +1,6 @@
 {
   "name": "jglr",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "simple asynchronous batch-file processing framework",
   "keywords": [
     "async",
