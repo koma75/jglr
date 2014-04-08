@@ -16,7 +16,7 @@
   },
   "main": "./lib/jglr/jglr",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/test"
   },
   "homepage": "https://github.com/koma75/jglr",
   "bugs": {
@@ -34,6 +34,10 @@
     "grunt-contrib-coffee": "^0.10.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt": "^0.4.4",
-    "grunt-contrib-uglify": "^0.4.0"
+    "grunt-contrib-uglify": "^0.4.0",
+    "log4js": "^0.6.12"
+  },
+  "dependencies": {
+    "async": "^0.7.0"
   }
 }
