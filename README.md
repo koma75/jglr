@@ -114,6 +114,10 @@ Known issues & bugs
 * batch file is read at once.  Jglr cannot process extremely large files.
 * There maybe a limit to the number of recursions if used with callbacks
   that are not asynchronous.
+    * when calling the done() callback, make sure that is is not directly 
+      called back from the command callback.
+    * if necessary, use setTimeout() with 0 milliseconds to call the done
+      callback to avoid over-recursion. i.e. setTimeout(done,0)
 
 License
 ------------------------------------------------------------------------
