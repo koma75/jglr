@@ -9,9 +9,9 @@ module.exports = (grunt)->
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
     watch:
-      coffee_lib:
-        files: ['coffee_lib/**/*.coffee']
-        tasks: ['coffeelint:lib', 'coffee:lib']
+      coffee:
+        files: ['coffee_lib/**/*.coffee','coffee_test/**/*.coffee']
+        tasks: ['coffeelint', 'coffee']
       uglify_lib:
         files: ['lib/**/*.js']
         tasks: ['uglify:lib']
@@ -22,6 +22,14 @@ module.exports = (grunt)->
           cwd: 'coffee_lib/'
           src: ['**/*.coffee']
           dest: 'lib/'
+          ext: '.js'
+        ]
+      test:
+        files: [
+          expand: true
+          cwd: 'coffee_test/'
+          src: ['**/*.coffee']
+          dest: 'test/'
           ext: '.js'
         ]
     uglify:
@@ -39,5 +47,8 @@ module.exports = (grunt)->
       lib:
         files:
           src: ['coffee_lib/**/*.coffee']
+      test:
+        files:
+          src: ['coffee_test/**/*.coffee']
 
   return

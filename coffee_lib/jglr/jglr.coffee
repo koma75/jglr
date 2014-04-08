@@ -1,44 +1,42 @@
 ###
   @license
   crowdutil
+  Copyright (c) 2014, Yasuhiro Okuno (Koma)
+  All rights reserved.
 
-  The MIT License (MIT)
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-  Copyright (c) 2014 Yasuhiro Okuno
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
 
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN crowdECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
 ###
 
 async = require 'async'
 
 jglogger =
   trace: (msg) ->
-    console.log msg
     return
   debug: (msg) ->
-    console.log msg
     return
   info: (msg) ->
-    console.log msg
     return
   warn: (msg) ->
-    console.log msg
     return
   error: (msg) ->
     console.log msg
@@ -55,7 +53,7 @@ class Jglr
     content = fs.readFileSync(fn, 'utf-8')
     content = content.split("\n")
     for line in content
-      retArr.push(line.split(","))
+      retArr.push(line.trim().split(","))
     return retArr
 
   # load the file specified by the constructor, or this command
@@ -78,36 +76,38 @@ class Jglr
   #   command [Array]: array of argument strings
   #   done() [Func]: needs to be called once the command is done
   registerCmd: (cmd, callback) ->
-    jglogger.trace 'jglr.registerCmd'
+    jglogger.trace "jglr.registerCmd #{cmd}"
     if typeof @cmds[cmd] != 'undefined'
       jglogger.debug "replacing #{cmd} #{@cmds[cmd]}"
     @cmds[cmd] = callback
 
   _getNextBatch: () ->
     jglogger.trace 'jglr._getNextBatch'
-    next = true
     retArr = []
-    if @batch.length == 0
-      return null
 
-    if @mode == 'seq'
-      retArr.push(@batch.pop())
-    else
-      while @batch.length > 0
-        if(
-          typeof @batch[0][0] == string &&
-          (
-            @batch[0][0] == 'seq' ||
-            @batch[0][0] == 'par' ||
-            @batch[0][0] == 'wait'
-          )
+    while @batch.length > 0
+      if(
+        typeof @batch[0][0] == 'string' &&
+        (
+          @batch[0][0] == 'seq' ||
+          @batch[0][0] == 'par' ||
+          @batch[0][0] == 'wait'
         )
-          if @batch[0][0] != 'wait'
-            @mode = @batch[0][0]
-          @batch.pop()
-          break
-        else
-          retArr.push(@batch.pop())
+      )
+        if @batch[0][0] != 'wait'
+          @mode = @batch[0][0]
+        jglogger.debug "ignore: #{@batch.splice(0,1)}"
+        retArr.push(['noop'])
+        break
+      else if (@batch[0][0] == '')
+        jglogger.debug "ignore: #{@batch.splice(0,1)}"
+        retArr.push(['noop'])
+      else
+        nextline = @batch.splice(0,1)
+        jglogger.debug "pushing: #{JSON.stringify(nextline[0])}"
+        retArr.push(nextline[0])
+      if @mode == 'seq'
+        break
     return retArr
 
   _doBatch: (bat, next) ->
@@ -116,12 +116,11 @@ class Jglr
     async.each(
       bat,
       (command, done) ->
-        jglogger.debug command
-        jglogger.debug(JSON.stringify(self.cmds, null, 2))
         if typeof self.cmds[command[0]] == 'function'
+          jglogger.info "jglr._doBatch: dispatch #{JSON.stringify(command)}"
           self.cmds[command[0]](command, done)
         else
-          jglogger.warn "no callback for #{command[0]}"
+          jglogger.info "jglr._doBatch: no callback for #{command[0]}"
           done()
         return
       , (err) ->
@@ -135,8 +134,9 @@ class Jglr
   # next(hasNext): callback that gets called once all the commands finish
   #   hasNext [boolean]: true if there is still commands left in the batch
   dispatchNext: (next) ->
-    jglogger.trace 'jglr.dispatchNext'
+    jglogger.trace '-------- jglr.dispatchNext'
     nextBatch = @_getNextBatch()
+    jglogger.debug "nextBatch = \n#{JSON.stringify(nextBatch,null,2)}"
     if !nextBatch
       next(false)
     else
