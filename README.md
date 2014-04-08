@@ -24,6 +24,7 @@ npm install jglr
 ### basic usage
 
 ~~~javascript
+var Jglr = require('jglr');
 var jglr, myNext;
 
 jglr = new Jglr.Jglr();
@@ -73,6 +74,25 @@ the next(hasNext) callback will be called.  If hasNext is true, you can
 call dispatchNext(next) again recursively to dispatch the next set of 
 commands.
 
+~~~
+seq
+<cmd1>,<param1>,<param2>,<param3>
+<cmd2>,<param1>,<param2>,<param3>
+<cmd3>,<param1>,<param2>,<param3>
+par
+<cmd4>,<param1>,<param2>,<param3>
+<cmd5>,<param1>,<param2>,<param3>
+<cmd6>,<param1>,<param2>,<param3>
+wait
+<cmd7>,<param1>,<param2>,<param3>
+<cmd8>,<param1>,<param2>,<param3>
+~~~
+
+With the above example, cmd1 ~ cmd3 will be executed sequentially, then 
+cmd4 through cmd6 will be dispatched all at once.  After cmd4 through cmd6
+is finished, cmd7 and cmd8 will be dispatched at once. After all commands
+are executed, next callback will be called with hasNext = false.
+
 #### reserved commands
 
 certain commands are reserved for special purposes
@@ -85,6 +105,8 @@ currently executing commands.
 Useful for syncing in the middle of a batch file to make sure certain 
 commands are done before proceeding
 
+Any callbacks to this command name will be ignored.
+
 ##### seq
 
 If the batch command __seq__ is called, the dispatcher will wait for all 
@@ -92,6 +114,8 @@ currently executing commands and turn into sequential execution mode.
 
 All following commands will be executed sequentially, until __par__ is
 executed
+
+Any callbacks to this command name will be ignored.
 
 ##### par
 
@@ -101,12 +125,16 @@ currently executing commands and turn into parallel execution mode.
 All following commands will be executed in parallel, until __seq__ is
 executed.
 
+Any callbacks to this command name will be ignored.
+
 ##### noop
 
 Will be inserted in place of an empty line or any of the other reserved
-commands mentioned above.
+commands mentioned above.  Also will be executed once at the end of file.
 
-You can register callbacks to noop to override noops (i.e. for debug purposes)
+You can register callbacks to noop to override noops (i.e. debug purposes).
+Although you cannot intentionally pass parameters to noop via the reserved
+commands (reserved commands will be called as noop with no parameters).
 
 Known issues & bugs
 ------------------------------------------------------------------------
