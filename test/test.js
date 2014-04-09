@@ -29,7 +29,7 @@
  */
 
 (function() {
-  var Jglr, initLogger, log4js, start, test001;
+  var Jglr, initLogger, log4js, start, test001, test002;
 
   Jglr = require('../lib/jglr/jglr');
 
@@ -58,7 +58,7 @@
     logger.debug("logger : " + logger.constructor);
   };
 
-  test001 = function() {
+  test001 = function(callback) {
     var jglr, myNext;
     jglr = new Jglr.Jglr({
       'logger': global.logger
@@ -70,12 +70,39 @@
       return setTimeout(function() {
         logger.info("---test001: cmd1 DONE");
         return done();
+      }, 0);
+    });
+    myNext = function(hasNext) {
+      if (hasNext) {
+        jglr.dispatchNext(myNext);
+      } else if (typeof callback === 'function') {
+        callback();
+      }
+    };
+    return jglr.dispatchNext(myNext);
+  };
+
+  test002 = function(callback) {
+    var answer, jglr, resultArr;
+    jglr = new Jglr.Jglr({
+      'logger': global.logger
+    });
+    jglr.load('./test/test002.jgl');
+    logger.debug(jglr);
+    resultArr = [];
+    jglr.registerCmd('cmd1', function(command, done) {
+      logger.info("test001: running " + (JSON.stringify(command)));
+      return setTimeout(function() {
+        logger.info("---test001: cmd1 DONE");
+        resultArr.push(1);
+        return done();
       }, 500);
     });
     jglr.registerCmd('cmd2', function(command, done) {
       logger.info("test001: running " + (JSON.stringify(command)));
       return setTimeout(function() {
         logger.info("---test001: cmd2 DONE");
+        resultArr.push(2);
         return done();
       }, 400);
     });
@@ -83,6 +110,7 @@
       logger.info("test001: running " + (JSON.stringify(command)));
       return setTimeout(function() {
         logger.info("---test001: cmd3 DONE");
+        resultArr.push(3);
         return done();
       }, 300);
     });
@@ -90,6 +118,7 @@
       logger.info("test001: running " + (JSON.stringify(command)));
       return setTimeout(function() {
         logger.info("---test001: cmd4 DONE");
+        resultArr.push(4);
         return done();
       }, 200);
     });
@@ -97,22 +126,55 @@
       logger.info("test001: running " + (JSON.stringify(command)));
       return setTimeout(function() {
         logger.info("---test001: cmd5 DONE");
+        resultArr.push(5);
         return done();
       }, 100);
     });
-    myNext = function(hasNext) {
-      if (hasNext) {
-        jglr.dispatchNext(myNext);
+    answer = [1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 5, 4, 3, 2, 1, 1, 2, 3];
+
+    /*
+    myNext = (hasNext) ->
+      if hasNext
+        jglr.dispatchNext(myNext)
+      else if typeof callback == 'function'
+        logger.info JSON.stringify(resultArr)
+        if JSON.stringify(resultArr) != JSON.stringify(answer)
+          throw new Error "execution order not correct!"
+        callback()
+      return
+    jglr.dispatchNext(myNext)
+     */
+    return jglr.dispatch(function(err) {
+      if (err) {
+        logger.warn(err.message);
       }
-    };
-    return jglr.dispatchNext(myNext);
+      if (typeof callback === 'function') {
+        logger.info(JSON.stringify(resultArr));
+        if (JSON.stringify(resultArr) !== JSON.stringify(answer)) {
+          throw new Error("execution order not correct!");
+        }
+        callback();
+      }
+    });
   };
 
   start = function() {
+    var count, doNext, stack;
     initLogger();
     logger.info("==================test start======================");
     logger.info("start test: test001");
-    return test001();
+    stack = [test001, test002];
+    logger.debug("stack = \n" + stack);
+    count = 0;
+    doNext = function() {
+      if (stack.length <= count) {
+        logger.info("TEST DONE");
+      } else {
+        stack[count](doNext);
+        count++;
+      }
+    };
+    return doNext();
   };
 
   start();

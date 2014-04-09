@@ -10,6 +10,10 @@ simple asynchronous batch-file processing framework
 
 Date        | Version   | Changes
 :--         | --:       | :--
+2014.04.08  | 0.2.0     | Added Jglr.dispatch()
+            |           | fix for README.
+2014.04.08  | 0.1.1     | maintenance fix release
+            |           | fix for README.
 2014.04.08  | 0.1.0     | Initial release
 
 Usage
@@ -98,6 +102,27 @@ jglr.dispatchNext(myNext);
         * hasNext [Boolean]: true if there is still commands left to execute
           false if it has reached end of batch file.
 
+#### jglr.dispatch(done)
+
+* description
+    * dispatch the batch and recieve done callback when all batch is done.
+* params
+    * done [Function]: function(err)
+        * err [Object]: null if successful. Error object if there was an
+          error
+
+~~~javascript
+var isDone = function(err) {
+  if(err) {
+    console.log(err.message);
+  } else {
+    console.log("finished my batch!");
+  }
+}
+
+jglr.dispatchNext(isDone);
+~~~
+
 ### batch file format
 
 Batch file is a csv where the first collum is the command name to execute
@@ -181,6 +206,10 @@ Known issues & bugs
 * batch file is read at once.  Jglr cannot process extremely large files.
 * There maybe a limit to the number of recursions if used with callbacks
   that are not asynchronous.
+    * when calling the done() callback, make sure that is is not directly 
+      called back from the command callback.
+    * if necessary, use setTimeout() with 0 milliseconds to call the done
+      callback to avoid over-recursion. i.e. setTimeout(done,0)
 
 License
 ------------------------------------------------------------------------
