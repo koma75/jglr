@@ -69,10 +69,10 @@ jglr.dispatchNext(myNext);
     * create jglr instance
 * params
     * opts [Object]: hash object to initialize with.
-        * filename [String] (null): path to batch file.
-        * logger [Object] (null): log4js logger object to use. if ommitted, 
+        * filename [String], (null): path to batch file.
+        * logger [Object], (null): log4js logger object to use. if ommitted, 
           console will be used for error reports.
-        * mode [String] ("seq"): initial mode of either "seq" or "par"
+        * mode [String], ("seq"): initial mode of either "seq" or "par"
 
 #### jglr.load(filename)
 
