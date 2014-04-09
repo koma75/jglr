@@ -112,21 +112,20 @@ class Jglr
 
   _doBatch: (bat, next) ->
     jglogger.trace "jglr._doBatch"
-    self = @
     async.each(
       bat,
-      (command, done) ->
-        if typeof self.cmds[command[0]] == 'function'
+      (command, done) =>
+        if typeof @cmds[command[0]] == 'function'
           jglogger.info "jglr._doBatch: dispatch #{JSON.stringify(command)}"
-          self.cmds[command[0]](command, done)
+          @cmds[command[0]](command, done)
         else
           jglogger.info "jglr._doBatch: no callback for #{command[0]}"
           done()
         return
-      , (err) ->
+      , (err) =>
         if err
           jglogger.debug err.message
-        next(self.batch.length > 0)
+        next(@batch.length > 0)
         return
     )
     return
@@ -141,6 +140,17 @@ class Jglr
       next(false)
     else
       @_doBatch(nextBatch, next)
+    return
+
+  # done(err): callback when all batch process is done.
+  #
+  dispatch: (done) ->
+    doNext = (hasNext) =>
+      if hasNext
+        @dispatchNext(doNext)
+      else
+        done()
+    @dispatchNext(doNext)
     return
 
   # Jglr constructor
@@ -163,28 +173,27 @@ class Jglr
 exports.Jglr = Jglr
 
 ###
-Jglr = require 'Jglr'
+  Jglr = require 'Jglr'
 
-jglr = new Jglr.Jglr(filename)
+  jglr = new Jglr.Jglr(filename)
 
-jglr.load()
+  jglr.load()
 
-jglr.registerCmd(
-  'run',
-  (argv, done) ->
-    console.log argv
-    setTimeout(() ->
-      done()
-    , 100
-    )
-    return
-)
+  jglr.registerCmd(
+    'run',
+    (argv, done) ->
+      console.log argv
+      setTimeout(() ->
+        done()
+      , 100
+      )
+      return
+  )
 
-myNext = (hasNext) ->
-  if hasNext
-    jglr.dispatchNext(myNext)
+  myNext = (hasNext) ->
+    if hasNext
+      jglr.dispatchNext(myNext)
 
-jglr.dispatchNext(myNext)
-
+  jglr.dispatchNext(myNext)
 ###
 
