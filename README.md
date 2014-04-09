@@ -10,6 +10,10 @@ simple asynchronous batch-file processing framework
 
 Date        | Version   | Changes
 :--         | --:       | :--
+2014.04.08  | 0.2.0     | Added Jglr.dispatch()
+            |           | fix for README.
+2014.04.08  | 0.1.1     | maintenance fix release
+            |           | fix for README.
 2014.04.08  | 0.1.0     | Initial release
 
 Usage
@@ -97,6 +101,27 @@ jglr.dispatchNext(myNext);
     * next [Function]: function(hasNext)
         * hasNext [Boolean]: true if there is still commands left to execute
           false if it has reached end of batch file.
+
+#### jglr.dispatch(done)
+
+* description
+    * dispatch the batch and recieve done callback when all batch is done.
+* params
+    * done [Function]: function(err)
+        * err [Object]: null if successful. Error object if there was an
+          error
+
+~~~javascript
+var isDone = function(err) {
+  if(err) {
+    console.log(err.message);
+  } else {
+    console.log("finished my batch!");
+  }
+}
+
+jglr.dispatchNext(isDone);
+~~~
 
 ### batch file format
 
