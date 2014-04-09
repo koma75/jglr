@@ -156,6 +156,7 @@ test002 = (callback) ->
   answer = [ 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 5, 4, 3, 2, 1, 1, 2, 3 ]
 
   # run!
+  ###
   myNext = (hasNext) ->
     if hasNext
       jglr.dispatchNext(myNext)
@@ -166,6 +167,18 @@ test002 = (callback) ->
       callback()
     return
   jglr.dispatchNext(myNext)
+  ###
+  jglr.dispatch(
+    (err) ->
+      if err
+        logger.warn err.message
+      if typeof callback == 'function'
+        logger.info JSON.stringify(resultArr)
+        if JSON.stringify(resultArr) != JSON.stringify(answer)
+          throw new Error "execution order not correct!"
+        callback()
+      return
+  )
 
 start = () ->
   initLogger()

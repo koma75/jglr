@@ -83,7 +83,7 @@
   };
 
   test002 = function(callback) {
-    var answer, jglr, myNext, resultArr;
+    var answer, jglr, resultArr;
     jglr = new Jglr.Jglr({
       'logger': global.logger
     });
@@ -131,18 +131,31 @@
       }, 100);
     });
     answer = [1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 5, 4, 3, 2, 1, 1, 2, 3];
-    myNext = function(hasNext) {
-      if (hasNext) {
-        jglr.dispatchNext(myNext);
-      } else if (typeof callback === 'function') {
+
+    /*
+    myNext = (hasNext) ->
+      if hasNext
+        jglr.dispatchNext(myNext)
+      else if typeof callback == 'function'
+        logger.info JSON.stringify(resultArr)
+        if JSON.stringify(resultArr) != JSON.stringify(answer)
+          throw new Error "execution order not correct!"
+        callback()
+      return
+    jglr.dispatchNext(myNext)
+     */
+    return jglr.dispatch(function(err) {
+      if (err) {
+        logger.warn(err.message);
+      }
+      if (typeof callback === 'function') {
         logger.info(JSON.stringify(resultArr));
         if (JSON.stringify(resultArr) !== JSON.stringify(answer)) {
           throw new Error("execution order not correct!");
         }
         callback();
       }
-    };
-    return jglr.dispatchNext(myNext);
+    });
   };
 
   start = function() {
