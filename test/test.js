@@ -29,7 +29,7 @@
  */
 
 (function() {
-  var Jglr, initLogger, log4js, start, test001, test002;
+  var Jglr, initLogger, log4js, start, test001, test002, test003;
 
   Jglr = require('../lib/jglr/jglr');
 
@@ -158,12 +158,88 @@
     });
   };
 
+  test003 = function(callback) {
+    var answer, jglr, resultArr;
+    jglr = new Jglr.Jglr({
+      'logger': global.logger
+    });
+    jglr.load('./test/test003.jgl');
+    logger.debug(jglr);
+    resultArr = [];
+    jglr.registerCmd('cmd1', function(command, done) {
+      logger.info("test001: running " + (JSON.stringify(command)));
+      return setTimeout(function() {
+        logger.info("---test003: cmd1 DONE");
+        resultArr.push(1);
+        return done();
+      }, 500);
+    });
+    jglr.registerCmd('cmd2', function(command, done) {
+      logger.info("test001: running " + (JSON.stringify(command)));
+      return setTimeout(function() {
+        logger.info("---test003: cmd2 DONE");
+        resultArr.push(2);
+        return done();
+      }, 400);
+    });
+    jglr.registerCmd('cmd3', function(command, done) {
+      logger.info("test001: running " + (JSON.stringify(command)));
+      return setTimeout(function() {
+        logger.info("---test003: cmd3 DONE");
+        resultArr.push(3);
+        return done();
+      }, 300);
+    });
+    jglr.registerCmd('cmd4', function(command, done) {
+      logger.info("test001: running " + (JSON.stringify(command)));
+      return setTimeout(function() {
+        logger.info("---test003: cmd4 DONE");
+        resultArr.push(4);
+        return done();
+      }, 200);
+    });
+    jglr.registerCmd('cmd5', function(command, done) {
+      logger.info("test001: running " + (JSON.stringify(command)));
+      return setTimeout(function() {
+        logger.info("---test003: cmd5 DONE");
+        resultArr.push(5);
+        return done(new Error("STOP WITH ERROR"));
+      }, 100);
+    });
+    answer = [1, 2, 3, 4, 4, 3, 2, 1, 5];
+
+    /*
+    myNext = (hasNext) ->
+      if hasNext
+        jglr.dispatchNext(myNext)
+      else if typeof callback == 'function'
+        logger.info JSON.stringify(resultArr)
+        if JSON.stringify(resultArr) != JSON.stringify(answer)
+          throw new Error "execution order not correct!"
+        callback()
+      return
+    jglr.dispatchNext(myNext)
+     */
+    return jglr.dispatch(function(err) {
+      if (err) {
+        logger.warn(err.message);
+      }
+      if (typeof callback === 'function') {
+        logger.info(JSON.stringify(resultArr));
+        if (JSON.stringify(resultArr) !== JSON.stringify(answer)) {
+          throw new Error("execution order not correct!");
+        }
+        callback();
+      }
+    }, true);
+  };
+
   start = function() {
     var count, doNext, stack;
     initLogger();
     logger.info("==================test start======================");
     logger.info("start test: test001");
-    stack = [test001, test002];
+    stack = [test002, test003];
     logger.debug("stack = \n" + stack);
     count = 0;
     doNext = function() {

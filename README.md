@@ -98,18 +98,21 @@ jglr.dispatchNext(myNext);
 * description
     * dispatch the next set of commands in the batch file
 * params
-    * next [Function]: function(hasNext)
+    * next [Function]: function(hasNext, err)
         * hasNext [Boolean]: true if there is still commands left to execute
           false if it has reached end of batch file.
+        * err [Error]: error object passed from the last batch execution
 
-#### jglr.dispatch(done)
+#### jglr.dispatch(done, haltOnErr)
 
 * description
     * dispatch the batch and recieve done callback when all batch is done.
 * params
-    * done [Function]: function(err)
+    * done [Function]: function(err, haltOnErr)
         * err [Object]: null if successful. Error object if there was an
           error
+        * haltOnErr [Boolean]: if true, the execution will halt as error
+          is set on error.
 
 ~~~javascript
 var isDone = function(err) {
