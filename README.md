@@ -10,6 +10,8 @@ simple asynchronous batch-file processing framework
 
 Date        | Version   | Changes
 :--         | --:       | :--
+2014.04.12  | 0.3.0     | Added Jglr.setLimit() and parallel execution limit
+            |           | Added Error handling support
 2014.04.08  | 0.2.0     | Added Jglr.dispatch()
             |           | fix for README.
 2014.04.08  | 0.1.1     | maintenance fix release
