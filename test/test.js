@@ -29,7 +29,7 @@
  */
 
 (function() {
-  var Jglr, initLogger, log4js, start, test001, test002, test003;
+  var Jglr, initLogger, log4js, start, test001, test002, test003, test004;
 
   Jglr = require('../lib/jglr/jglr');
 
@@ -147,12 +147,13 @@
     return jglr.dispatch(function(err) {
       if (err) {
         logger.warn(err.message);
-      }
-      if (typeof callback === 'function') {
+      } else {
         logger.info(JSON.stringify(resultArr));
         if (JSON.stringify(resultArr) !== JSON.stringify(answer)) {
           throw new Error("execution order not correct!");
         }
+      }
+      if (typeof callback === 'function') {
         callback();
       }
     });
@@ -223,12 +224,38 @@
     return jglr.dispatch(function(err) {
       if (err) {
         logger.warn(err.message);
-      }
-      if (typeof callback === 'function') {
+      } else {
         logger.info(JSON.stringify(resultArr));
         if (JSON.stringify(resultArr) !== JSON.stringify(answer)) {
           throw new Error("execution order not correct!");
         }
+      }
+      if (typeof callback === 'function') {
+        callback();
+      }
+    }, true);
+  };
+
+  test004 = function(callback) {
+    var jglr;
+    jglr = new Jglr.Jglr({
+      'logger': global.logger
+    });
+    jglr.load('./test/test004.jgl');
+    logger.debug(jglr);
+    jglr.registerCmd('cmd1', function(command, done) {
+      logger.info("test004: running " + (JSON.stringify(command)));
+      return setTimeout(function() {
+        logger.info("---test004: " + (JSON.stringify(command)) + " DONE");
+        return done();
+      }, Math.random() * 1000);
+    });
+    return jglr.dispatch(function(err) {
+      if (err) {
+        logger.warn(err.message);
+      }
+      if (typeof callback === 'function') {
+        logger.info("test004 done");
         callback();
       }
     }, true);
@@ -239,7 +266,7 @@
     initLogger();
     logger.info("==================test start======================");
     logger.info("start test: test001");
-    stack = [test001, test002, test003];
+    stack = [test001, test002, test003, test004];
     logger.debug("stack = \n" + stack);
     count = 0;
     doNext = function() {
