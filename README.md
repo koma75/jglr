@@ -55,7 +55,11 @@ jglr.registerCmd('cmd2', function(command, done) {
 });
 
 // setup the callback for NEXT
-myNext = function(hasNext) {
+myNext = function(hasNext, err) {
+  if (err) {
+    // do whatever with error. i.e. stop execution.
+    console.log("error: " + err.message());
+  }
   if (hasNext) {
     jglr.dispatchNext(myNext);
   }
