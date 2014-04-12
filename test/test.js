@@ -239,7 +239,7 @@
     initLogger();
     logger.info("==================test start======================");
     logger.info("start test: test001");
-    stack = [test002, test003];
+    stack = [test001, test002, test003];
     logger.debug("stack = \n" + stack);
     count = 0;
     doNext = function() {

@@ -14,9 +14,10 @@ cmd2,opt1,opt2,opt3
 cmd3,opt1,opt2,opt3
 cmd4,opt1,opt2,opt3
 cmd5,opt1,opt2,opt3
+cmd5,opt1,opt2,opt3
 wait
 seq
-cmd1,opt1,opt2,opt3
-cmd2,opt1,opt2,opt3
-cmd3,opt1,opt2,opt3
-
+cmd5,opt1,opt2,opt3
+cmd5,opt1,opt2,opt3
+cmd5,opt1,opt2,opt3
+cmd5,opt1,opt2,opt3

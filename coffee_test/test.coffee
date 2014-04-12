@@ -285,6 +285,7 @@ start = () ->
   logger.info "==================test start======================"
   logger.info "start test: test001"
   stack = [
+    test001,
     test002,
     test003
   ]
