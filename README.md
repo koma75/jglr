@@ -110,11 +110,11 @@ jglr.dispatchNext(myNext);
 * description
     * dispatch the batch and recieve done callback when all batch is done.
 * params
-    * done [Function]: function(err, haltOnErr)
+    * done [Function]: function(err)
         * err [Object]: null if successful. Error object if there was an
           error
-        * haltOnErr [Boolean]: if true, the execution will halt as error
-          is set on error.
+    * haltOnErr [Boolean]: if true, the execution will halt as error
+      is set on error.
 
 ~~~javascript
 var isDone = function(err) {
