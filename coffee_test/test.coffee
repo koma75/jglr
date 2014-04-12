@@ -180,13 +180,114 @@ test002 = (callback) ->
       return
   )
 
+test003 = (callback) ->
+  jglr = new Jglr.Jglr({
+    'logger': global.logger
+  })
+  jglr.load('./test/test003.jgl')
+  logger.debug jglr
+
+  resultArr = []
+
+  # setup commands
+  jglr.registerCmd(
+    'cmd1',
+    (command, done) ->
+      logger.info "test001: running #{JSON.stringify(command)}"
+      setTimeout(
+        () ->
+          logger.info "---test003: cmd1 DONE"
+          resultArr.push(1)
+          done()
+        ,500
+      )
+  )
+  jglr.registerCmd(
+    'cmd2',
+    (command, done) ->
+      logger.info "test001: running #{JSON.stringify(command)}"
+      setTimeout(
+        () ->
+          logger.info "---test003: cmd2 DONE"
+          resultArr.push(2)
+          done()
+        ,400
+      )
+  )
+  jglr.registerCmd(
+    'cmd3',
+    (command, done) ->
+      logger.info "test001: running #{JSON.stringify(command)}"
+      setTimeout(
+        () ->
+          logger.info "---test003: cmd3 DONE"
+          resultArr.push(3)
+          done()
+        ,300
+      )
+  )
+  jglr.registerCmd(
+    'cmd4',
+    (command, done) ->
+      logger.info "test001: running #{JSON.stringify(command)}"
+      setTimeout(
+        () ->
+          logger.info "---test003: cmd4 DONE"
+          resultArr.push(4)
+          done()
+        ,200
+      )
+  )
+  jglr.registerCmd(
+    'cmd5',
+    (command, done) ->
+      logger.info "test001: running #{JSON.stringify(command)}"
+      setTimeout(
+        () ->
+          logger.info "---test003: cmd5 DONE"
+          resultArr.push(5)
+          done(new Error("STOP WITH ERROR"))
+        ,100
+      )
+  )
+  
+  answer = [1,2,3,4,4,3,2,1,5]
+
+  # run!
+  ###
+  myNext = (hasNext) ->
+    if hasNext
+      jglr.dispatchNext(myNext)
+    else if typeof callback == 'function'
+      logger.info JSON.stringify(resultArr)
+      if JSON.stringify(resultArr) != JSON.stringify(answer)
+        throw new Error "execution order not correct!"
+      callback()
+    return
+  jglr.dispatchNext(myNext)
+  ###
+  jglr.dispatch(
+    (err) ->
+      if err
+        logger.warn err.message
+      if typeof callback == 'function'
+        logger.info JSON.stringify(resultArr)
+        if JSON.stringify(resultArr) != JSON.stringify(answer)
+          throw new Error "execution order not correct!"
+        callback()
+      return
+    , true
+  )
+
+
 start = () ->
   initLogger()
   logger.info "==================test start======================"
   logger.info "start test: test001"
   stack = [
     test001,
-    test002
+    test002,
+    test003
   ]
 
   logger.debug "stack = \n#{stack}"

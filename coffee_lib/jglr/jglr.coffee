@@ -124,14 +124,16 @@ class Jglr
         return
       , (err) =>
         if err
-          jglogger.debug err.message
-        next(@batch.length > 0)
+          next(@batch.length > 0, err)
+        else
+          next(@batch.length > 0)
         return
     )
     return
 
-  # next(hasNext): callback that gets called once all the commands finish
+  # next(hasNext, err): callback that gets called once all the commands finish
   #   hasNext [boolean]: true if there is still commands left in the batch
+  #   err [Error]: error object
   dispatchNext: (next) ->
     jglogger.trace '-------- jglr.dispatchNext'
     nextBatch = @_getNextBatch()
@@ -144,8 +146,15 @@ class Jglr
 
   # done(err): callback when all batch process is done.
   #
-  dispatch: (done) ->
-    doNext = (hasNext) =>
+  dispatch: (done, haltOnErr) ->
+    doNext = (hasNext, err) =>
+      if err
+        jglogger.error "jglr.dispatch: error!"
+        if haltOnErr
+          done(err)
+          return
+        else
+          jglogger.error "jglr.dispatch: #{err.message}"
       if hasNext
         @dispatchNext(doNext)
       else
