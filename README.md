@@ -10,6 +10,7 @@ simple asynchronous batch-file processing framework
 
 Date        | Version   | Changes
 :--         | --:       | :--
+2014.04.12  | 0.3.1     | Fix Documentation
 2014.04.12  | 0.3.0     | Added Jglr.setLimit() and parallel execution limit
             |           | Added Error handling support
 2014.04.08  | 0.2.0     | Added Jglr.dispatch()
@@ -119,13 +120,14 @@ jglr.dispatchNext(myNext);
 ~~~javascript
 var isDone = function(err) {
   if(err) {
-    console.log(err.message);
+    console.log("halted execution: " + err.message);
   } else {
     console.log("finished my batch!");
   }
 }
 
-jglr.dispatchNext(isDone);
+// dispatch.  Halt on any error encountered in a batch.
+jglr.dispatch(isDone, true);
 ~~~
 
 #### jglr.setLimit(limit)
@@ -206,6 +208,21 @@ executions at any time.  The default is 10. (same as setLimit method)
 
 Any callbacks to this command name will be ignored.
 
+~~~
+par,3
+cmd1
+cmd2
+cmd3
+cmd4
+cmd5
+cmd6
+~~~
+
+With the above example, first three commands cmd1, cmd2, cmd3 will be
+dispatched immediately, and all following commands will be dispatched
+as previouse commands finiesh execution, and maintain the parallelism
+of command to 3.
+
 ##### noop
 
 Will be inserted in place of an empty line or any of the other reserved
@@ -223,8 +240,20 @@ Known issues & bugs
   that are not asynchronous.
     * when calling the done() callback, make sure that is is not directly 
       called back from the command callback.
-    * if necessary, use setTimeout() with 0 milliseconds to call the done
-      callback to avoid over-recursion. i.e. setTimeout(done,0)
+    * if necessary, use setTimeout() with 0 millisecond timeout to call the
+      done callback to avoid over-recursion. i.e. setTimeout(done,0)
+
+~~~javascript
+jglr.registerCmd('cmd1', function(command, done) {
+  if(!paramCheck(command)) {
+    // make sure done is called asynchronousely
+    setTimeout(function() {
+      done(new Error("invalid command!"));
+    }, 0);
+  }
+  // execute the command and call done()
+});
+~~~
 
 License
 ------------------------------------------------------------------------
