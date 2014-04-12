@@ -96,6 +96,11 @@ class Jglr
       )
         if @batch[0][0] != 'wait'
           @mode = @batch[0][0]
+          if(
+            @batch[0][0] == 'par' &&
+            typeof @batch[0][1] != 'undefined'
+          )
+            @setLimit(@batch[0][1])
         jglogger.debug "ignore: #{@batch.splice(0,1)}"
         retArr.push(['noop'])
         break
@@ -112,8 +117,9 @@ class Jglr
 
   _doBatch: (bat, next) ->
     jglogger.trace "jglr._doBatch"
-    async.each(
+    async.eachLimit(
       bat,
+      @parLimit,
       (command, done) =>
         if typeof @cmds[command[0]] == 'function'
           jglogger.info "jglr._doBatch: dispatch #{JSON.stringify(command)}"
@@ -162,6 +168,15 @@ class Jglr
     @dispatchNext(doNext)
     return
 
+  setLimit: (limit) ->
+    if typeof limit == 'number'
+      @parLimit = Math.floor(limit)
+    else if typeof limit == 'string'
+      num = parseInt(limit, 10)
+      if !isNaN(num)
+        @parLimit = num
+    return
+
   # Jglr constructor
   constructor: (opts) ->
     # default values
@@ -169,6 +184,7 @@ class Jglr
     @mode = 'seq'
     @cmds = {}
     @batch = []
+    @parLimit = 10
     if typeof opts == 'object'
       if typeof opts.filename == 'string'
         @filename = opts.filename
@@ -176,6 +192,8 @@ class Jglr
         jglogger = opts.logger
       if typeof opts.mode == 'string'
         @mode = opts.mode
+      if typeof opts.parLimit != 'undefined'
+        @setLimit(opts.parLimit)
     jglogger.trace 'jglr.new'
     return
 

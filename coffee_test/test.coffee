@@ -172,10 +172,11 @@ test002 = (callback) ->
     (err) ->
       if err
         logger.warn err.message
-      if typeof callback == 'function'
+      else
         logger.info JSON.stringify(resultArr)
         if JSON.stringify(resultArr) != JSON.stringify(answer)
           throw new Error "execution order not correct!"
+      if typeof callback == 'function'
         callback()
       return
   )
@@ -270,15 +271,47 @@ test003 = (callback) ->
     (err) ->
       if err
         logger.warn err.message
-      if typeof callback == 'function'
+      else
         logger.info JSON.stringify(resultArr)
         if JSON.stringify(resultArr) != JSON.stringify(answer)
           throw new Error "execution order not correct!"
+      if typeof callback == 'function'
         callback()
       return
     , true
   )
 
+test004 = (callback) ->
+  jglr = new Jglr.Jglr({
+    'logger': global.logger
+  })
+  jglr.load('./test/test004.jgl')
+  logger.debug jglr
+
+  # setup commands
+  jglr.registerCmd(
+    'cmd1',
+    (command, done) ->
+      logger.info "test004: running #{JSON.stringify(command)}"
+      setTimeout(
+        () ->
+          logger.info "---test004: #{JSON.stringify(command)} DONE"
+          done()
+        ,Math.random() * 1000
+      )
+  )
+
+  # run!
+  jglr.dispatch(
+    (err) ->
+      if err
+        logger.warn err.message
+      if typeof callback == 'function'
+        logger.info "test004 done"
+        callback()
+      return
+    , true
+  )
 
 start = () ->
   initLogger()
@@ -287,7 +320,8 @@ start = () ->
   stack = [
     test001,
     test002,
-    test003
+    test003,
+    test004
   ]
 
   logger.debug "stack = \n#{stack}"

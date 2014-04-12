@@ -126,6 +126,13 @@ var isDone = function(err) {
 jglr.dispatchNext(isDone);
 ~~~
 
+#### jglr.setLimit(limit)
+
+* description
+    * set the number of maximum dispatch at any time in parallel mode.
+* params
+    * limit [number], (10): number to set in string format or an integer.
+
 ### batch file format
 
 Batch file is a csv where the first collum is the command name to execute
@@ -191,6 +198,9 @@ currently executing commands and turn into parallel execution mode.
 
 All following commands will be executed in parallel, until __seq__ is
 executed.
+
+par can take a second argument to set the maximum number of parallel
+executions at any time.  The default is 10. (same as setLimit method)
 
 Any callbacks to this command name will be ignored.
 
