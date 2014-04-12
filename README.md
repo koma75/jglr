@@ -80,6 +80,7 @@ jglr.dispatchNext(myNext);
         * logger [Object], (null): log4js logger object to use. if ommitted, 
           console will be used for error reports.
         * mode [String], ("seq"): initial mode of either "seq" or "par"
+        * parLimit [Integer], (10): initial parallel execution limit
 
 #### jglr.load(filename)
 
@@ -97,8 +98,16 @@ jglr.dispatchNext(myNext);
 * params
     * cmdname [String]: command name to hook to
     * callback [Function]: function(params, done)
-        * params is an array of parameters written in tha batch
-        * done() is the callback to call when the command is done.
+        * params is an array of parameters written in the batch including
+          the command name itself.
+        * done(err) is the callback to call when the command is done.
+            * if Error object is passed to err, the err will be propagated
+              to the next callback of jglr.dispatchNext.  If jglr.dispatch
+              was used, and haltOnErr was set, the batch execution will
+              halt and done callback of jglr.dispatch will be called.
+              In that case, the rest of the batch file will not be executed.
+            * You can choose to continue the execution of the batch file
+              by calling jglr.dispatchNext.
 
 #### jglr.dispatchNext(next)
 
@@ -106,7 +115,7 @@ jglr.dispatchNext(myNext);
     * dispatch the next set of commands in the batch file
 * params
     * next [Function]: function(hasNext, err)
-        * hasNext [Boolean]: true if there is still commands left to execute
+        * hasNext [Boolean]: true if there are still commands left to execute.
           false if it has reached end of batch file.
         * err [Error]: error object passed from the last batch execution
 
@@ -128,7 +137,7 @@ var isDone = function(err) {
   } else {
     console.log("finished my batch!");
   }
-}
+};
 
 // dispatch.  Halt on any error encountered in a batch.
 jglr.dispatch(isDone, true);
@@ -140,6 +149,7 @@ jglr.dispatch(isDone, true);
     * set the number of maximum dispatch at any time in parallel mode.
 * params
     * limit [number], (10): number to set in string format or an integer.
+        * if the value is invalid, it will be ignored.
 
 ### batch file format
 
@@ -224,7 +234,7 @@ cmd6
 
 With the above example, first three commands cmd1, cmd2, cmd3 will be
 dispatched immediately, and all following commands will be dispatched
-as previouse commands finiesh execution, and maintain the parallelism
+as previouse commands finish execution, and maintain the parallelism
 of command to 3.
 
 ##### noop
@@ -240,9 +250,9 @@ Known issues & bugs
 ------------------------------------------------------------------------
 
 * batch file is read at once.  Jglr cannot process extremely large files.
-* There maybe a limit to the number of recursions if used with callbacks
+* There is a limit to the number of recursions if used with callbacks
   that are not asynchronous.
-    * when calling the done() callback, make sure that is is not directly 
+    * when calling the done() callback, make sure that it is not directly 
       called back from the command callback.
     * if necessary, use setTimeout() with 0 millisecond timeout to call the
       done callback to avoid over-recursion. i.e. setTimeout(done,0)
@@ -250,12 +260,14 @@ Known issues & bugs
 ~~~javascript
 jglr.registerCmd('cmd1', function(command, done) {
   if(!paramCheck(command)) {
+    // Parameter Error.  
     // make sure done is called asynchronousely
     setTimeout(function() {
-      done(new Error("invalid command!"));
+      done(new Error("invalid command parameter!"));
     }, 0);
+  } else {
+    // execute the command and call done()
   }
-  // execute the command and call done()
 });
 ~~~
 
