@@ -4,7 +4,7 @@ jglr
 About
 ------------------------------------------------------------------------
 
-jglr /ˈdʒʌɡələr/
+jglr /ˈdʒʌɡlər/
 
 simple asynchronous batch-file processing framework
 
